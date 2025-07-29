@@ -136,6 +136,22 @@ variable "langfuse_helm_chart_version" {
   default     = "1.5.14"
 }
 
+variable "signup_disabled" {
+  description = "Whether to disable signup"
+  type        = bool
+  default     = false
+}
+
+variable "langfuse_google_auth" {
+  description = "Google OAuth configuration for Langfuse authentication"
+  type = object({
+    client_id       = string
+    client_secret   = string
+    allowed_domains = list(string)
+  })
+  default = null
+}
+
 # Resource configuration variables
 variable "langfuse_cpu" {
   description = "CPU allocation for Langfuse containers"

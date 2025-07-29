@@ -17,6 +17,7 @@ langfuse:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: ${aws_iam_role.langfuse_irsa.arn}
+  
   # Resource configuration for production workloads
   resources:
     limits:
@@ -34,6 +35,8 @@ langfuse:
       initialDelaySeconds: 60
   worker:
     replicas: ${var.langfuse_worker_replicas}
+  features:
+    signUpDisabled: ${var.signup_disabled}
 postgresql:
   deploy: false
   host: ${aws_rds_cluster.postgres.endpoint}:5432
@@ -128,6 +131,7 @@ langfuse:
       - path: /
         pathType: Prefix
 EOT
+
   encryption_values = var.use_encryption_key == false ? "" : <<EOT
 langfuse:
   encryptionKey:
@@ -155,6 +159,16 @@ clickhouse:
         <metric_log remove="1"/>
         <latency_log remove="1"/>
       </clickhouse>
+EOT
+
+  auth_values = var.langfuse_google_auth == null ? "" : <<EOT
+langfuse:
+  auth:
+    providers:
+      google:
+        client_id: ${var.langfuse_google_auth.client_id}
+        client_secret: ${var.langfuse_google_auth.client_secret}
+        allowed_domains: ${join(",", var.langfuse_google_auth.allowed_domains)}
 EOT
 }
 
@@ -209,6 +223,7 @@ resource "helm_release" "langfuse" {
     local.encryption_values,
     local.additional_env_values,
     local.clickhouse_overwrite_values,
+    local.auth_values,
   ])
 
   depends_on = [
