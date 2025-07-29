@@ -17,6 +17,7 @@ langfuse:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: ${aws_iam_role.langfuse_irsa.arn}
+  
   # Resource configuration for production workloads
   resources:
     limits:
@@ -31,6 +32,8 @@ langfuse:
       initialDelaySeconds: 60
     readinessProbe:
       initialDelaySeconds: 60
+  features:
+    signUpDisabled: ${var.signup_disabled}
 postgresql:
   deploy: false
   host: ${aws_rds_cluster.postgres.endpoint}:5432
@@ -105,6 +108,16 @@ langfuse:
       name: ${kubernetes_secret.langfuse.metadata[0].name}
       key: encryption_key
 EOT
+
+  auth_values = var.langfuse_google_auth == null ? "" : <<EOT
+langfuse:
+  auth:
+    providers:
+      google:
+        client_id: ${var.langfuse_google_auth.client_id}
+        client_secret: ${var.langfuse_google_auth.client_secret}
+        allowed_domains: ${join(",", var.langfuse_google_auth.allowed_domains)}
+EOT
 }
 
 resource "kubernetes_namespace" "langfuse" {
@@ -157,6 +170,7 @@ resource "helm_release" "langfuse" {
     local.langfuse_values,
     local.ingress_values,
     local.encryption_values,
+    local.auth_values,
   ]
 
   depends_on = [

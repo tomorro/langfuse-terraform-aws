@@ -88,7 +88,23 @@ variable "use_single_nat_gateway" {
 variable "langfuse_helm_chart_version" {
   description = "Version of the Langfuse Helm chart to deploy"
   type        = string
-  default     = "1.2.15"
+  default     = "1.3.2"
+}
+
+variable "signup_disabled" {
+  description = "Whether to disable signup"
+  type        = bool
+  default     = false
+}
+
+variable "langfuse_google_auth" {
+  description = "Google OAuth configuration for Langfuse authentication"
+  type = object({
+    client_id       = string
+    client_secret   = string
+    allowed_domains = list(string)
+  })
+  default = null
 }
 
 # Resource configuration variables
