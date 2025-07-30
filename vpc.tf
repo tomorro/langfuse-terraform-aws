@@ -10,7 +10,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
-  name = "${var.name}-vpc"
+  name = "${local.name}-vpc"
   cidr = var.vpc_cidr
 
   azs             = local.azs
@@ -32,18 +32,18 @@ module "vpc" {
 
   # Add required tags for the AWS Load Balancer Controller
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"   = "1"
-    "kubernetes.io/cluster/${var.name}" = "shared"
+    "kubernetes.io/role/internal-elb"     = "1"
+    "kubernetes.io/cluster/${local.name}" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb"            = "1"
-    "kubernetes.io/cluster/${var.name}" = "shared"
+    "kubernetes.io/role/elb"              = "1"
+    "kubernetes.io/cluster/${local.name}" = "shared"
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = local.name
+  })
 }
 
 # VPC Endpoints for AWS services
@@ -56,9 +56,9 @@ resource "aws_vpc_endpoint" "sts" {
 
   private_dns_enabled = true
 
-  tags = {
-    Name = "${local.tag_name} STS VPC Endpoint"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-sts-vpc-endpoint"
+  })
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -67,14 +67,14 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_endpoint_type = "Gateway"
   route_table_ids   = module.vpc.private_route_table_ids
 
-  tags = {
-    Name = "${local.tag_name} S3 VPC Endpoint"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-s3-vpc-endpoint"
+  })
 }
 
 # Security group for VPC endpoints
 resource "aws_security_group" "vpc_endpoints" {
-  name        = "${var.name}-vpc-endpoints"
+  name        = "${local.name}-vpc-endpoints"
   description = "Security group for VPC endpoints"
   vpc_id      = module.vpc.vpc_id
 
@@ -85,7 +85,7 @@ resource "aws_security_group" "vpc_endpoints" {
     cidr_blocks = [module.vpc.vpc_cidr_block]
   }
 
-  tags = {
-    Name = "${local.tag_name} VPC Endpoints"
-  }
-} 
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-vpc-endpoints"
+  })
+}

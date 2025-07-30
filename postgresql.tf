@@ -1,5 +1,5 @@
 resource "aws_security_group" "postgres" {
-  name        = "${var.name}-postgres"
+  name        = "${local.name}-postgres"
   description = "Security group for Langfuse PostgreSQL"
   vpc_id      = module.vpc.vpc_id
 
@@ -17,9 +17,9 @@ resource "aws_security_group" "postgres" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} Postgres"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-postgres"
+  })
 }
 
 # Random password for PostgreSQL
@@ -34,16 +34,16 @@ resource "random_password" "postgres_password" {
 
 # Aurora PostgreSQL Serverless v2 Cluster
 resource "aws_db_subnet_group" "postgres" {
-  name       = "${var.name}-postgres-subnet-group"
+  name       = "${local.name}-postgres-subnet-group"
   subnet_ids = module.vpc.private_subnets
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-postgres-subnet-group"
+  })
 }
 
 resource "aws_rds_cluster" "postgres" {
-  cluster_identifier           = "${var.name}-postgres"
+  cluster_identifier           = "${local.name}-postgres"
   engine                       = "aurora-postgresql"
   engine_mode                  = "provisioned"
   engine_version               = var.postgres_version
@@ -63,20 +63,20 @@ resource "aws_rds_cluster" "postgres" {
     max_capacity = var.postgres_max_capacity
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-postgres-parameter-group"
+  })
 }
 
 resource "aws_rds_cluster_parameter_group" "postgres" {
-  name        = "${var.name}-postgres-parameter-group"
+  name        = "${local.name}-postgres-parameter-group"
   family      = "aurora-postgresql15"
-  description = "Parameter group for ${local.tag_name} Postgres"
+  description = "Parameter group for ${local.name} Postgres"
 }
 
 resource "aws_rds_cluster_instance" "postgres" {
   count              = var.postgres_instance_count
-  identifier         = "${var.name}-postgres-${count.index + 1}"
+  identifier         = "${local.name}-postgres-${count.index + 1}"
   cluster_identifier = aws_rds_cluster.postgres.id
   instance_class     = "db.serverless"
   engine             = aws_rds_cluster.postgres.engine
@@ -86,7 +86,7 @@ resource "aws_rds_cluster_instance" "postgres" {
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
-  tags = {
-    Name = "${local.tag_name} ${count.index + 1}"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-postgres-instance-${count.index + 1}"
+  })
 }

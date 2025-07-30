@@ -3,7 +3,7 @@ data "aws_eks_cluster_auth" "langfuse" {
 }
 
 resource "aws_eks_cluster" "langfuse" {
-  name     = var.name
+  name     = "${local.name}-eks"
   role_arn = aws_iam_role.eks.arn
   version  = var.kubernetes_version
 
@@ -16,9 +16,9 @@ resource "aws_eks_cluster" "langfuse" {
 
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-eks"
+  })
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy,
@@ -33,9 +33,9 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.langfuse.identity[0].oidc[0].issuer
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-eks-openid"
+  })
 }
 
 # Get EKS OIDC certificate
@@ -45,7 +45,7 @@ data "tls_certificate" "eks" {
 
 # Fargate Profile Role
 resource "aws_iam_role" "fargate" {
-  name = "${var.name}-fargate"
+  name = "${local.name}-fargate"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -60,9 +60,9 @@ resource "aws_iam_role" "fargate" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} Fargate"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-fargate"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "fargate_pod_execution_role_policy" {
@@ -75,7 +75,7 @@ resource "aws_eks_fargate_profile" "namespaces" {
   for_each = toset(var.fargate_profile_namespaces)
 
   cluster_name           = aws_eks_cluster.langfuse.name
-  fargate_profile_name   = "${var.name}-${each.value}"
+  fargate_profile_name   = "${local.name}-${each.value}"
   pod_execution_role_arn = aws_iam_role.fargate.arn
   subnet_ids             = module.vpc.private_subnets
 
@@ -83,19 +83,19 @@ resource "aws_eks_fargate_profile" "namespaces" {
     namespace = each.value
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = local.name
+  })
 }
 
 resource "aws_security_group" "eks" {
-  name        = "${var.name}-eks"
+  name        = "${local.name}-eks"
   description = "Security group for Langfuse EKS cluster"
   vpc_id      = module.vpc.vpc_id
 
-  tags = {
-    Name = "${local.tag_name} EKS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-eks"
+  })
 }
 
 resource "aws_security_group_rule" "eks_egress" {
@@ -117,7 +117,7 @@ resource "aws_security_group_rule" "eks_vpc" {
 }
 
 resource "aws_iam_role" "eks" {
-  name = "${var.name}-eks"
+  name = "${local.name}-eks"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -132,9 +132,9 @@ resource "aws_iam_role" "eks" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} EKS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-eks"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -148,6 +148,6 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
-  name              = "/aws/eks/${var.name}/cluster"
+  name              = "/aws/eks/${local.name}/cluster"
   retention_in_days = 30
-} 
+}
