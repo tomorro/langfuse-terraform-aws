@@ -109,14 +109,16 @@ langfuse:
       key: encryption_key
 EOT
 
-  auth_values = var.langfuse_google_auth == null ? "" : <<EOT
+  auth_values = var.langfuse_auth == null ? "" : <<EOT
 langfuse:
   auth:
     providers:
-      google:
-        client_id: ${var.langfuse_google_auth.client_id}
-        client_secret: ${var.langfuse_google_auth.client_secret}
-        allowed_domains: ${join(",", var.langfuse_google_auth.allowed_domains)}
+%{for provider_name, provider_config in var.langfuse_auth~}
+      ${provider_name}:
+%{for key, value in provider_config~}
+        ${key}: ${value}
+%{endfor~}
+%{endfor~}
 EOT
 }
 
