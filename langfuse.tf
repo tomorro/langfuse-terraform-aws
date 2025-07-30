@@ -35,6 +35,8 @@ langfuse:
       initialDelaySeconds: 60
   worker:
     replicas: ${var.langfuse_worker_replicas}
+  auth:
+    disableUsernamePassword: ${var.username_password_disabled}
   features:
     signUpDisabled: ${var.signup_disabled}
 postgresql:

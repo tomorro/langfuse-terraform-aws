@@ -148,6 +148,6 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
-  name              = "/aws/eks/${local.name}/cluster"
+  name              = "/aws/eks/${local.name}-eks/cluster"
   retention_in_days = 30
 }

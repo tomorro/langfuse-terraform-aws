@@ -35,13 +35,13 @@ module "vpc" {
 
   # Add required tags for the AWS Load Balancer Controller
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"     = "1"
-    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/role/internal-elb"         = "1"
+    "kubernetes.io/cluster/${local.name}-eks" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb"              = "1"
-    "kubernetes.io/cluster/${local.name}" = "shared"
+    "kubernetes.io/role/elb"                  = "1"
+    "kubernetes.io/cluster/${local.name}-eks" = "shared"
   }
 
   tags = merge(local.common_tags, {
