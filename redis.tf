@@ -1,5 +1,5 @@
 resource "aws_security_group" "redis" {
-  name        = "${var.name}-redis"
+  name        = "${local.name}-redis"
   description = "Security group for Langfuse Redis"
   vpc_id      = module.vpc.vpc_id
 
@@ -17,14 +17,14 @@ resource "aws_security_group" "redis" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} Redis"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-redis"
+  })
 }
 
 resource "aws_elasticache_parameter_group" "redis" {
   family = "redis7"
-  name   = "${var.name}-redis-params"
+  name   = "${local.name}-redis-params"
 
   parameter {
     name  = "maxmemory-policy"
@@ -33,12 +33,12 @@ resource "aws_elasticache_parameter_group" "redis" {
 }
 
 resource "aws_cloudwatch_log_group" "redis" {
-  name              = "/redis/${var.name}"
+  name              = "/redis/${local.name}"
   retention_in_days = 7
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
-  name       = "${var.name}-redis-subnet-group"
+  name       = "${local.name}-redis-subnet-group"
   subnet_ids = module.vpc.private_subnets
 }
 
@@ -53,7 +53,7 @@ resource "random_password" "redis_password" {
 }
 
 resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id       = var.name
+  replication_group_id       = local.name
   description                = "Redis cluster for Langfuse"
   node_type                  = var.cache_node_type
   port                       = 6379
@@ -76,7 +76,7 @@ resource "aws_elasticache_replication_group" "redis" {
     log_type         = "slow-log"
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-redis"
+  })
 }

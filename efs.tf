@@ -1,12 +1,12 @@
 # EFS File System
 resource "aws_efs_file_system" "langfuse" {
-  creation_token  = "${var.name}-efs"
+  creation_token  = "${local.name}-efs"
   encrypted       = true
   throughput_mode = "elastic"
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-efs"
+  })
 }
 
 # Mount targets in each private subnet
@@ -19,7 +19,7 @@ resource "aws_efs_mount_target" "eks" {
 
 # Security group for EFS
 resource "aws_security_group" "efs" {
-  name        = "${var.name}-efs"
+  name        = "${local.name}-efs"
   description = "Security group for EFS"
   vpc_id      = module.vpc.vpc_id
 
@@ -38,14 +38,14 @@ resource "aws_security_group" "efs" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} EFS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-efs"
+  })
 }
 
 # EFS CSI Driver IAM Policy
 resource "aws_iam_policy" "efs" {
-  name = "${var.name}-efs"
+  name = "${local.name}-efs"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -85,14 +85,14 @@ resource "aws_iam_policy" "efs" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} EFS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-efs"
+  })
 }
 
 # EFS CSI Driver IAM Role
 resource "aws_iam_role" "efs" {
-  name = "${var.name}-efs-csi"
+  name = "${local.name}-efs-csi"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
