@@ -1,3 +1,15 @@
+variable "env" {
+  description = "Environment"
+  type        = string
+  default     = "dev"
+}
+
+variable "common_tags" {
+  description = "Tags to apply to resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "name" {
   description = "Name prefix for resources"
   type        = string

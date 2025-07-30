@@ -27,9 +27,9 @@ resource "aws_efs_access_point" "clickhouse" {
     uid = 1001
   }
 
-  tags = {
-    Name = "${local.tag_name} Clickhouse"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-clickhouse"
+  })
 }
 
 # EFS Access Points for Zookeeper instances
@@ -51,9 +51,9 @@ resource "aws_efs_access_point" "zookeeper" {
     uid = 1001
   }
 
-  tags = {
-    Name = "${local.tag_name} Zookeper"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.name}-zookeper"
+  })
 }
 
 # Create the Clickhouse PVs
