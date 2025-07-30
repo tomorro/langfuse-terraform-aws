@@ -115,6 +115,12 @@ variable "signup_disabled" {
   default     = false
 }
 
+variable "username_password_disabled" {
+  description = "Whether to disable username/password authentication"
+  type        = bool
+  default     = false
+}
+
 variable "langfuse_auth" {
   description = "Google OAuth configuration for Langfuse authentication"
   type        = map(map(string))
