@@ -3,7 +3,7 @@ data "aws_eks_cluster_auth" "langfuse" {
 }
 
 resource "aws_eks_cluster" "langfuse" {
-  name     = "${local.name}-eks"
+  name     = local.eks_cluster_name
   role_arn = aws_iam_role.eks.arn
   version  = var.kubernetes_version
 
@@ -17,7 +17,7 @@ resource "aws_eks_cluster" "langfuse" {
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   tags = merge(local.common_tags, {
-    Name = "${local.name}-eks"
+    Name = local.eks_cluster_name
   })
 
   depends_on = [
@@ -34,7 +34,7 @@ resource "aws_iam_openid_connect_provider" "eks" {
   url             = aws_eks_cluster.langfuse.identity[0].oidc[0].issuer
 
   tags = merge(local.common_tags, {
-    Name = "${local.name}-eks-openid"
+    Name = "${local.eks_cluster_name}-openid"
   })
 }
 
@@ -117,7 +117,7 @@ resource "aws_security_group_rule" "eks_vpc" {
 }
 
 resource "aws_iam_role" "eks" {
-  name = "${local.name}-eks"
+  name = local.eks_cluster_name
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -133,7 +133,7 @@ resource "aws_iam_role" "eks" {
   })
 
   tags = merge(local.common_tags, {
-    Name = "${local.name}-eks"
+    Name = local.eks_cluster_name
   })
 }
 
@@ -148,6 +148,6 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 }
 
 resource "aws_cloudwatch_log_group" "eks" {
-  name              = "/aws/eks/${local.name}/cluster"
+  name              = "/aws/eks/${local.eks_cluster_name}/cluster"
   retention_in_days = 30
 }

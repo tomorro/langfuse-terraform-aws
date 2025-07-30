@@ -32,6 +32,8 @@ langfuse:
       initialDelaySeconds: 60
     readinessProbe:
       initialDelaySeconds: 60
+  auth:
+    disableUsernamePassword: ${var.username_password_disabled}
   features:
     signUpDisabled: ${var.signup_disabled}
 postgresql:
