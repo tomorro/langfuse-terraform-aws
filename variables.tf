@@ -142,14 +142,10 @@ variable "signup_disabled" {
   default     = false
 }
 
-variable "langfuse_google_auth" {
+variable "langfuse_auth" {
   description = "Google OAuth configuration for Langfuse authentication"
-  type = object({
-    client_id       = string
-    client_secret   = string
-    allowed_domains = list(string)
-  })
-  default = null
+  type        = map(map(string))
+  default     = null
 }
 
 # Resource configuration variables
