@@ -17,9 +17,9 @@ resource "aws_security_group" "postgres" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} Postgres"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-postgres"
+  })
 }
 
 # Random password for PostgreSQL
@@ -37,9 +37,9 @@ resource "aws_db_subnet_group" "postgres" {
   name       = "${var.name}-postgres-subnet-group"
   subnet_ids = module.vpc.private_subnets
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-postgres-subnet-group"
+  })
 }
 
 resource "aws_rds_cluster" "postgres" {
@@ -63,9 +63,9 @@ resource "aws_rds_cluster" "postgres" {
     max_capacity = var.postgres_max_capacity
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-postgres-parameter-group"
+  })
 }
 
 resource "aws_rds_cluster_parameter_group" "postgres" {
@@ -86,7 +86,7 @@ resource "aws_rds_cluster_instance" "postgres" {
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
-  tags = {
-    Name = "${local.tag_name} ${count.index + 1}"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-postgres-instance-${count.index + 1}"
+  })
 }

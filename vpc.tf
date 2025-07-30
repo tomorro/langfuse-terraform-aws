@@ -41,9 +41,9 @@ module "vpc" {
     "kubernetes.io/cluster/${var.name}" = "shared"
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = local.tag_name
-  }
+  })
 }
 
 # VPC Endpoints for AWS services
@@ -56,9 +56,9 @@ resource "aws_vpc_endpoint" "sts" {
 
   private_dns_enabled = true
 
-  tags = {
-    Name = "${local.tag_name} STS VPC Endpoint"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-sts-vpc-endpoint"
+  })
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -67,9 +67,9 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_endpoint_type = "Gateway"
   route_table_ids   = module.vpc.private_route_table_ids
 
-  tags = {
-    Name = "${local.tag_name} S3 VPC Endpoint"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-s3-vpc-endpoint"
+  })
 }
 
 # Security group for VPC endpoints
@@ -85,7 +85,7 @@ resource "aws_security_group" "vpc_endpoints" {
     cidr_blocks = [module.vpc.vpc_cidr_block]
   }
 
-  tags = {
-    Name = "${local.tag_name} VPC Endpoints"
-  }
-} 
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-vpc-endpoints"
+  })
+}

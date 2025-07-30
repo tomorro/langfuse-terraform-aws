@@ -23,7 +23,7 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
   name               = "aws-load-balancer-controller"
 
   tags = {
-    Name = "${local.tag_name} ALB"
+    Name = "${local.tag_name}-alb"
   }
 }
 
@@ -275,7 +275,7 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
   })
 
   tags = {
-    Name = "${local.tag_name} ALB"
+    Name = "${local.tag_name}-alb"
   }
 }
 

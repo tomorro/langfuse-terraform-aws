@@ -16,9 +16,9 @@ resource "aws_eks_cluster" "langfuse" {
 
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = local.tag_name
-  }
+  })
 
   depends_on = [
     aws_iam_role_policy_attachment.eks_cluster_policy,
@@ -33,9 +33,9 @@ resource "aws_iam_openid_connect_provider" "eks" {
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.langfuse.identity[0].oidc[0].issuer
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = local.tag_name
-  }
+  })
 }
 
 # Get EKS OIDC certificate
@@ -60,9 +60,9 @@ resource "aws_iam_role" "fargate" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} Fargate"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-fargate"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "fargate_pod_execution_role_policy" {
@@ -83,9 +83,9 @@ resource "aws_eks_fargate_profile" "namespaces" {
     namespace = each.value
   }
 
-  tags = {
+  tags = merge(local.common_tags, {
     Name = local.tag_name
-  }
+  })
 }
 
 resource "aws_security_group" "eks" {
@@ -93,9 +93,9 @@ resource "aws_security_group" "eks" {
   description = "Security group for Langfuse EKS cluster"
   vpc_id      = module.vpc.vpc_id
 
-  tags = {
-    Name = "${local.tag_name} EKS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-eks"
+  })
 }
 
 resource "aws_security_group_rule" "eks_egress" {
@@ -132,9 +132,9 @@ resource "aws_iam_role" "eks" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} EKS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-eks"
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -150,4 +150,4 @@ resource "aws_iam_role_policy_attachment" "eks_service_policy" {
 resource "aws_cloudwatch_log_group" "eks" {
   name              = "/aws/eks/${var.name}/cluster"
   retention_in_days = 30
-} 
+}

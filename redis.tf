@@ -17,9 +17,9 @@ resource "aws_security_group" "redis" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} Redis"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-redis"
+  })
 }
 
 resource "aws_elasticache_parameter_group" "redis" {
@@ -76,7 +76,7 @@ resource "aws_elasticache_replication_group" "redis" {
     log_type         = "slow-log"
   }
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-redis"
+  })
 }

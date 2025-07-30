@@ -7,11 +7,11 @@ resource "aws_s3_bucket" "langfuse" {
   bucket = "${local.bucket_prefix}-${var.name}"
 
   # Add tags for better resource management
-  tags = {
+  tags = merge(local.common_tags, {
     Name    = "${local.bucket_prefix}-${var.name}"
     Domain  = var.domain
     Service = "langfuse"
-  }
+  })
 }
 
 resource "aws_s3_bucket_versioning" "langfuse" {

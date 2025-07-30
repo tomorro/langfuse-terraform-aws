@@ -4,9 +4,9 @@ resource "aws_efs_file_system" "langfuse" {
   encrypted       = true
   throughput_mode = "elastic"
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-efs"
+  })
 }
 
 # Mount targets in each private subnet
@@ -38,9 +38,9 @@ resource "aws_security_group" "efs" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "${local.tag_name} EFS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-efs"
+  })
 }
 
 # EFS CSI Driver IAM Policy
@@ -85,9 +85,9 @@ resource "aws_iam_policy" "efs" {
     ]
   })
 
-  tags = {
-    Name = "${local.tag_name} EFS"
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-efs"
+  })
 }
 
 # EFS CSI Driver IAM Role

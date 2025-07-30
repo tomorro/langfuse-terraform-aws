@@ -3,9 +3,9 @@ resource "aws_acm_certificate" "cert" {
   domain_name       = var.domain
   validation_method = "DNS"
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-acm-certificate"
+  })
 
   lifecycle {
     create_before_destroy = true
@@ -16,9 +16,9 @@ resource "aws_acm_certificate" "cert" {
 resource "aws_route53_zone" "zone" {
   name = var.domain
 
-  tags = {
-    Name = local.tag_name
-  }
+  tags = merge(local.common_tags, {
+    Name = "${local.tag_name}-route53-zone"
+  })
 }
 
 # Create DNS records for certificate validation
